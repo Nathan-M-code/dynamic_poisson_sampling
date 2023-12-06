@@ -10,22 +10,16 @@ use image::{ImageBuffer, Luma, Rgb, buffer::ConvertBuffer};
 use rand::Rng;
 
 pub struct Param {
-    //how many random points generated and tested for each new point ?
-    pub k: u32, // k = 25,
-    //from where we dont plot point ?
-    pub threshold_min: f64, // = 0.1,
-    //from where we can go up than max_distance
-    pub threshold_max: f64, // = 0.8,
-    //when noise = 0, how many pixel ?
-    pub min_distance: f64, // = 3.,
-    //when noise = 1, how many pixel ?
-    pub max_distance: f64, // = 12.,
-}
-
-#[derive(Clone)]
-pub struct Point{
-    pub pos: (f64, f64),
-    pub radius: f64,
+    //how many random points are generated and tested for each new point
+    pub k: u32,
+    //from where we dont plot point
+    pub threshold_min: f64,
+    //from where we cant go up than max_distance
+    pub threshold_max: f64,
+    //when noise = 0, how many pixel
+    pub min_distance: f64,
+    //when noise = 1, how many pixel
+    pub max_distance: f64,
 }
 
 pub fn noise_map_to_image_buffer(nm: &NoiseMap) -> ImageBuffer<Luma<u8>, Vec<u8>> {
@@ -162,11 +156,10 @@ fn main() {
         }
     }
 
-    // let mut image: ImageBuffer<Rgb<u8>, Vec<u8>> = RgbImage::new(size_noise.0, size_noise.1);
+
     let mut image: ImageBuffer<Rgb<u8>, Vec<u8>> = noise_height.convert();
     for (_, p) in grid.iter(){
         draw_filled_circle_mut(&mut image, (p.0 as i32, p.1 as i32), 2, Rgb([0,255,0]));
     }
     display_image("image", &image, size_noise.0, size_noise.1);
-
 }
