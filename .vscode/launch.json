@@ -7,15 +7,15 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'dynamic_poison_sampling'",
+            "name": "Debug executable 'dynamic_poisson_sampling'",
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=dynamic_poison_sampling",
-                    "--package=dynamic_poison_sampling"
+                    "--bin=dynamic_poisson_sampling",
+                    "--package=dynamic_poisson_sampling"
                 ],
                 "filter": {
-                    "name": "dynamic_poison_sampling",
+                    "name": "dynamic_poisson_sampling",
                     "kind": "bin"
                 }
             },
@@ -25,16 +25,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in executable 'dynamic_poison_sampling'",
+            "name": "Debug unit tests in executable 'dynamic_poisson_sampling'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
-                    "--bin=dynamic_poison_sampling",
-                    "--package=dynamic_poison_sampling"
+                    "--bin=dynamic_poisson_sampling",
+                    "--package=dynamic_poisson_sampling"
                 ],
                 "filter": {
-                    "name": "dynamic_poison_sampling",
+                    "name": "dynamic_poisson_sampling",
                     "kind": "bin"
                 }
             },
