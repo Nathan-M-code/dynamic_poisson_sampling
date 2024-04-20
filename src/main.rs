@@ -45,14 +45,13 @@ fn main() {
 
 
     let param = Param{
-        bounds_min: (0., 0.),
-        bounds_max: (size_noise.0 as f64, size_noise.1 as f64),
+        bounds: (0., 0., size_noise.0 as f64, size_noise.1 as f64),
         k: 25,
     };
 
     
-    let points = get_points(&param, |pos|{
-        Some(noise_height.get_pixel(pos.0 as u32, pos.1 as u32).0[0] as f64/255.)
+    let points = get_points(&param, &mut rng, |pos|{
+        Some(5. + noise_height.get_pixel(pos.0 as u32, pos.1 as u32).0[0] as f64/255. * 20.)
     });
 
 
