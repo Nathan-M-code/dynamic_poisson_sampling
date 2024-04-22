@@ -1,31 +1,32 @@
 
-use std::f64::consts::PI;
+use rand;
 
-pub struct Param {
-    //boundaries of points (left, top, width, height)
-    pub bounds: (f64, f64, f64, f64),
-    //how many random points are generated and tested for each new point
-    pub k: u32,
+
+fn distance<const N: usize>(lhs: &[f64; N], rhs: &[f64; N]) -> f64{
+    lhs.iter()
+    .zip(rhs.iter())
+    .map(|(&l, &r)| {
+        let diff = l - r;
+        diff * diff
+    })
+    .sum::<f64>().sqrt()
 }
 
-pub fn distance(pos0: (f64, f64), pos1: (f64, f64)) -> f64{
-    ((pos0.0-pos1.0)*(pos0.0-pos1.0)+(pos0.1-pos1.1)*(pos0.1-pos1.1)).sqrt()
-}
 ///
 /// The density function 'density_func' takes the position of the tested point as a tuple argument
 /// and returns an optional radius. If it is None, the point is discarded.
 /// 
-pub fn get_points<T>(param: &Param, rng: &mut impl rand::Rng, density_func:T) -> Vec<(f64, f64)>
+pub fn get_points<const N: usize, T>(k: u32, first_pos: [f64; N], rng: &mut impl rand::Rng, density_func:T)
+-> Vec<[f64; N]>
 where
-    T: Fn((f64, f64)) -> Option<f64>
+    T: Fn(&[f64; N]) -> Option<f64>
 {
-    struct Point{
-        pos: (f64, f64),
+    struct Point<const N: usize>{
+        pos: [f64; N],
         min_rad: f64,
     }
 
-    //background grid
-    let mut points: Vec<Point> = Vec::new();
+    let mut points: Vec<Point<N>> = Vec::new();
     
     //active list
     let mut active_list: Vec<usize> = Vec::new();
@@ -34,52 +35,52 @@ where
 
 
 
-    //first random point
-    loop{
-        let r_pos: (f64, f64) = (rng.gen_range(param.bounds.0 .. param.bounds.0+param.bounds.2), rng.gen_range(param.bounds.1 .. param.bounds.1+param.bounds.3));
-        
-        let r_rad = density_func(r_pos);
-        if r_rad.is_none() { continue; }
-        let r_rad = r_rad.unwrap();
+    //first point
+    let r_rad = density_func(&first_pos);
+    if r_rad.is_none() { return vec![]; }
+    let r_rad = r_rad.unwrap();
 
-        points.push(Point{
-            pos: r_pos,
-            min_rad: r_rad,
-        });
-    
-        active_list.push(0);
-        break;
-    }
-
+    points.push(Point{
+        pos: first_pos,
+        min_rad: r_rad,
+    });
+    active_list.push(0);
 
 
 
     loop {
         let r_ind = rng.gen_range(0..active_list.len());
-        let curr_ind = *active_list.get(r_ind).unwrap();
-        let (curr_pos, curr_rad) = (points.get(curr_ind).unwrap().pos, points.get(curr_ind).unwrap().min_rad);
+        let curr_ind = active_list[r_ind];
+        let (curr_pos, curr_rad) = (points[curr_ind].pos, points[curr_ind].min_rad);
         
         // let mut to_remove = true;
-        'rloop: for _ in 0..param.k {
-            let r_angle = rng.gen_range(0. .. 2.*PI);
+        'k_l: for _ in 0..k {
             let r_distance = rng.gen_range(curr_rad .. 3.*curr_rad);
-            let r_pos = (curr_pos.0 + f64::cos(r_angle)*r_distance, curr_pos.1 + f64::sin(r_angle)*r_distance);
-    
-            if r_pos.0 < param.bounds.0 || r_pos.0 >= param.bounds.0+param.bounds.2 || r_pos.1 < param.bounds.1 || r_pos.1 >= param.bounds.1+param.bounds.3 {
-                continue 'rloop;
+
+
+            let mut deltas: [f64; N] = [0.0; N];
+
+            // Generate random direction
+            for delta in &mut deltas {
+                *delta = rng.gen_range(-1.0..=1.0);
+            }
+            
+            // Add deltas to current position
+            let norm = (deltas.iter().map(|&x| x.powi(2)).sum::<f64>()).sqrt();
+            let mut r_pos: [f64; N] = [0.0; N];
+            for i in 0..N{
+                r_pos[i] = curr_pos[i]+(deltas[i]/norm)*r_distance;
             }
 
-            let r_rad = density_func(r_pos);
-            if r_rad.is_none() { continue 'rloop; }
+
+            let r_rad = density_func(&r_pos);
+            if r_rad.is_none() { continue 'k_l; }
             let r_rad = r_rad.unwrap();
-            // println!("{:?}",rad);
-
-
 
             for point in points.iter() {
-                let distance = distance(point.pos, r_pos);
+                let distance = distance(&point.pos, &r_pos);
                 if distance < point.min_rad+r_rad {
-                    continue 'rloop;
+                    continue 'k_l;
                 }
             }
 
@@ -98,5 +99,5 @@ where
         }
     }
 
-    return points.iter().map(|p| p.pos).collect();
+    points.iter().map(|p| p.pos).collect()
 }
