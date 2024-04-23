@@ -1,7 +1,11 @@
 
+//! `dynamic_poisson_sampling` is a very simple crate 
+//! that allows using poisson sampling with dynamic distance. 
+
+
 use rand;
 
-
+#[doc(hidden)]
 fn distance<const N: usize>(lhs: &[f64; N], rhs: &[f64; N]) -> f64{
     lhs.iter()
     .zip(rhs.iter())
@@ -12,10 +16,30 @@ fn distance<const N: usize>(lhs: &[f64; N], rhs: &[f64; N]) -> f64{
     .sum::<f64>().sqrt()
 }
 
-///
-/// The density function 'density_func' takes the position of the tested point as a tuple argument
+/// Returns the points generated with a dynamic poisson sampling.  
+/// This function is **SLOW** but very permissive. It doesn't need to know the minimum and maximum radius in advance.  
+/// 
+/// The provided density function `density_func` takes the position of the current checked point as argument
 /// and returns an optional radius. If it is None, the point is discarded.
 /// 
+/// `k` represents the number of generated and checked points for each new one.  
+/// High value will slow down a lot the algorithm but will give more accurate results.  
+/// If you need fast results or accuracy doesn't matter, lower the value.  
+/// Typically, `k` varies from 10 to 30.
+/// 
+/// # Example
+/// ```rust
+/// use dynamic_poisson_sampling::get_points;
+/// let mut rng = rand::thread_rng();
+/// let points = get_points(12, (0.5, 0.5).into(), &mut rng, |pos|{
+///     // bound check to avoid infinite loop
+///     if pos[0] < 0.0 || pos[0] >= 1.0 || pos[1] < 0.0 || pos[1] >= 1.0{
+///         None
+///     }else{
+///         Some(0.05)
+///     }
+/// });
+/// ```
 pub fn get_points<const N: usize, T>(k: u32, first_pos: [f64; N], rng: &mut impl rand::Rng, density_func:T)
 -> Vec<[f64; N]>
 where

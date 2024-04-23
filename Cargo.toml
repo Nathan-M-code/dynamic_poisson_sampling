@@ -1,7 +1,13 @@
 [package]
 name = "dynamic_poisson_sampling"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2021"
+description = "A poisson disk sampling with dynamic distance."
+license = "MIT"
+repository = "https://github.com/Nathan-M-code/dynamic_poisson_sampling"
+readme = "README.md"
+category = [ "algorithms" ]
+keywords = [ "distribution", "poisson-disk", "multidimensional", "sampling" ]
 
 [dependencies]
 rand = "0.8.5"
